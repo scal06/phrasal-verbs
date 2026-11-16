@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phrasal Verbs Master - Entraînement Pro</title>
+    <!-- Tailwind CSS pour un design moderne et responsive -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        .wheel {
+            transition: transform 4s cubic-bezier(0.15, 0.9, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans">
+
+    <!-- En-tête -->
+    <header class="bg-slate-800 border-b border-slate-700 p-4 shadow-md">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                🎯 <span>Phrasal Verbs Master</span>
+            </h1>
+            <button onclick="toggleAide()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-sm font-medium transition cursor-pointer">
+                📖 Aide-mémoire
+            </button>
+        </div>
+    </header>
+
+    <!-- Contenu Principal -->
+    <main class="max-w-2xl w-full mx-auto p-4 flex-grow flex flex-col justify-center">
+        
+        <!-- Carte de Jeu / Exercice -->
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+            
+            <!-- Indicateur d'étape -->
+            <div class="flex justify-between items-center mb-6">
+                <span id="step-indicator" class="text-xs uppercase tracking-wider font-semibold text-indigo-400 bg-indigo-950/60 px-3 py-1 rounded-full border border-indigo-800/50">
+                    Étape 1 : Tourner la roue
+                </span>
+                <span id="score-display" class="text-sm font-medium text-slate-400">Score : <strong class="text-emerald-400" id="score-val">0</strong></span>
+            </div>
+
+            <!-- ÉTAPE 1 : LA ROUE -->
+            <div id="section-wheel" class="text-center py-4">
+                <h2 class="text-lg font-medium text-slate-200 mb-2">Faites tourner la roue pour découvrir un Phrasal Verb</h2>
+                <p class="text-sm text-slate-400 mb-6">La roue sélectionnera aléatoirement un verbe à pratiquer.</p>
+                
+                <!-- Conteneur de la Roue Visuelle -->
+                <div class="relative w-64 h-64 mx-auto mb-6 flex items-center justify-center">
+                    <!-- Flèche indicateur haut -->
+                    <div class="absolute -top-3 z-20 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[16px] border-t-amber-400 drop-shadow"></div>
+                    
+                    <!-- Roue SVG animée -->
+                    <div id="wheel-element" class="w-full h-full rounded-full border-4 border-slate-600 shadow-inner overflow-hidden relative wheel flex items-center justify-center bg-slate-700">
+                        <!-- Segments simulés visuellement -->
+                        <div class="absolute inset-0 grid grid-cols-2 grid-rows-3 opacity-80 pointer-events-none">
+                            <div class="bg-indigo-600 border border-slate-700 flex items-center justify-center text-[10px] p-1 font-bold">FOLLOW UP</div>
+                            <div class="bg-blue-600 border border-slate-700 flex items-center justify-center text-[10px] p-1 font-bold">BRING UP</div>
+                            <div class="bg-violet-600 border border-slate-700 flex items-center justify-center text-[10px] p-1 font-bold">RULE OUT</div>
+                            <div class="bg-purple-600 border border-slate-700 flex items-center justify-center text-[10px] p-1 font-bold">LOOK INTO</div>
+                            <div class="bg-sky-600 border border-slate-700 flex items-center justify-center text-[10px] p-1 font-bold">PUSH BACK</div>
+                            <div class="bg-teal-600 border border-slate-700 flex items-center justify-center text-[10px] p-1 font-bold">CATCH UP</div>
+                        </div>
+                        <!-- Centre de la roue -->
+                        <div class="absolute z-10 w-16 h-16 bg-slate-900 rounded-full border-4 border-slate-500 flex items-center justify-center shadow-lg">
+                            <span class="text-xs font-bold text-amber-400">SPIN</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="tournerLaRoue()" id="btn-spin" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-8 py-3 rounded-xl shadow-lg transition transform active:scale-95 cursor-pointer">
+                    🎲 Tourner la roue !
+                </button>
+            </div>
+
+            <!-- ÉTAPE 2 : LA PHRASE À TROU -->
+            <div id="section-quiz" class="hidden">
+                <div class="bg-indigo-950/40 border border-indigo-900/50 rounded-xl p-4 mb-6">
+                    <p class="text-xs text-indigo-300 uppercase tracking-wide font-semibold mb-1">Verbe sélectionné par la roue :</p>
+                    <div class="flex items-center justify-between">
+                        <span id="current-verb-target" class="text-xl font-bold text-amber-300">--</span>
+                        <span id="current-verb-meaning" class="text-sm text-slate-300 italic">--</span>
+                    </div>
+                </div>
+
+                <form onsubmit="verifierReponse(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Complétez la phrase en conjuguant au bon temps :</label>
+                        <p id="sentence-display" class="text-lg text-slate-100 bg-slate-900/80 p-4 rounded-xl border border-slate-700 leading-relaxed">
+                            <!-- Phrase injectée dynamiquement -->
+                        </p>
+                    </div>
+
+                    <div>
+                        <input type="text" id="user-input" autocomplete="off" placeholder="Entrez le phrasal verb conjugué..." 
+                            class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                        <p id="hint-tense" class="text-xs text-slate-400 mt-1.5 pl-1">Indice de temps : --</p>
+                    </div>
+
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" id="btn-submit" class="flex-grow bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl shadow transition cursor-pointer">
+                            Valider ma réponse
+                        </button>
+                        <button type="button" onclick="resetJeu()" class="hidden id-btn-next bg-slate-700 hover:bg-slate-600 text-white font-semibold px-6 py-3 rounded-xl transition cursor-pointer">
+                            Tourner à nouveau ➔
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Feedback / Correction -->
+                <div id="feedback-box" class="hidden mt-4 p-4 rounded-xl border text-sm"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal Aide-mémoire -->
+    <div id="modal-aide" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
+                <h3 class="text-lg font-bold text-amber-300">📖 Aide-mémoire des Phrasal Verbs</h3>
+                <button onclick="toggleAide()" class="text-slate-400 hover:text-white text-xl font-bold cursor-pointer">&times;</button>
+            </div>
+            <div class="space-y-3 text-sm text-slate-300">
+                <p><strong>Follow up :</strong> Assurer un suivi, relancer.</p>
+                <p><strong>Bring up :</strong> Soulever un sujet, mentionner.</p>
+                <p><strong>Rule out :</strong> Écarter (une option).</p>
+                <p><strong>Look into :</strong> Examiner, étudier.</p>
+                <p><strong>Push back :</strong> Reporter, repousser.</p>
+                <p><strong>Catch up :</strong> Faire le point, se mettre à jour.</p>
+            </div>
+            <div class="mt-6 text-right">
+                <button onclick="toggleAide()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium cursor-pointer">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pied de page -->
+    <footer class="text-center py-4 text-xs text-slate-500">
+        Phrasal Verbs Trainer • Conçu sur mesure pour votre progression
+    </footer>
+
+    <!-- Logique JavaScript -->
+    <script>
+        const database = [
+            {
+                verb: "follow up",
+                base: "follow up",
+                meaning: "Assurer un suivi / relancer",
+                sentence: "I'll ________ with the client on Monday to get their feedback.",
+                tense: "Futur simple (I'll ...)",
+                answers: ["follow up", "will follow up"]
+            },
+            {
+                verb: "bring up",
+                base: "bring up",
+                meaning: "Soulever un sujet / mentionner",
+                sentence: "Thanks for ________ that up—it's a critical point.",
+                tense: "Forme en -ing (après la préposition for)",
+                answers: ["bringing"]
+            },
+            {
+                verb: "rule out",
+                base: "rule out",
+                meaning: "Écarter (une option)",
+                sentence: "We can't ________ any potential delays at this stage.",
+                tense: "Infinitif (après modal can't)",
+                answers: ["rule out"]
+            },
+            {
+                verb: "look into",
+                base: "look into",
+                meaning: "Examiner / étudier",
+                sentence: "The engineering department is ________ into the software glitch.",
+                tense: "Présent continu (-ing)",
+                answers: ["looking"]
+            },
+            {
+                verb: "push back",
+                base: "push back",
+                meaning: "Repousser / reporter",
+                sentence: "Can we ________ back the deadline to next Friday?",
+                tense: "Infinitif (après modal Can we)",
+                answers: ["push"]
+            },
+            {
+                verb: "catch up",
+                base: "catch up",
+                meaning: "Faire le point / se mettre à jour",
+                sentence: "Let's ________ up over a coffee before the meeting.",
+                tense: "Infinitif (après Let's)",
+                answers: ["catch"]
+            }
+        ];
+
+        let currentItem = null;
+        let score = 0;
+        let currentRotation = 0;
+
+        function tournerLaRoue() {
+            const wheel = document.getElementById("wheel-element");
+            // Rotation aléatoire entre 4 et 8 tours complets + angle aléatoire
+            const randomExtra = Math.floor(Math.random() * 360);
+            currentRotation += 1440 + randomExtra;
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+            // Désactiver le bouton pendant l'animation
+            const btnSpin = document.getElementById("btn-spin");
+            btnSpin.disabled = true;
+
+            setTimeout(() => {
+                btnSpin.disabled = false;
+                selectionnerVerbeAleatoire();
+            }, 4000);
+        }
+
+        function selectionnerVerbeAleatoire() {
+            const randomIndex = Math.floor(Math.random() * database.length);
+            currentItem = database[randomIndex];
+
+            // Mise à jour de l'interface
+            document.getElementById("current-verb-target").innerText = currentItem.verb.toUpperCase();
+            document.getElementById("current-verb-meaning").innerText = `(${currentItem.meaning})`;
+            
+            // Remplacer le trou dans la phrase par un champ ou souligné
+            document.getElementById("sentence-display").innerHTML = currentItem.sentence;
+            document.getElementById("hint-tense").innerText = `Indice de grammaire / temps attendu : ${currentItem.tense}`;
+            
+            // Reset input et feedback
+            document.getElementById("user-input").value = "";
+            document.getElementById("feedback-box").classList.add("hidden");
+            document.getElementById("btn-submit").classList.remove("hidden");
+            
+            // Changer de vue
+            document.getElementById("section-wheel").classList.add("hidden");
+            document.getElementById("section-quiz").classList.remove("hidden");
+            document.getElementById("step-indicator").innerText = "Étape 2 : Compléter la phrase";
+            document.getElementById("user-input").focus();
+        }
+
+        function verifierReponse(event) {
+            event.preventDefault();
+            const userVal = document.getElementById("user-input").value.trim().toLowerCase();
+            const feedbackBox = document.getElementById("feedback-box");
+            
+            // Vérification si la réponse utilisateur correspond à l'une des réponses valides
+            const isCorrect = currentItem.answers.some(ans => userVal === ans.toLowerCase());
+
+            feedbackBox.classList.remove("hidden", "bg-emerald-950/60", "border-emerald-800", "text-emerald-200", "bg-rose-950/60", "border-rose-800", "text-rose-200");
+
+            if (isCorrect) {
+                score += 10;
+                document.getElementById("score-val").innerText = score;
+                feedbackBox.classList.add("bg-emerald-950/60", "border-emerald-800", "text-emerald-200");
+                feedbackBox.innerHTML = `<strong>🎉 Excellent !</strong> C'est la bonne réponse et la bonne conjugaison.`;
+                document.getElementById("btn-submit").classList.add("hidden");
+                
+                // Afficher le bouton pour relancer
+                const btnNext = document.querySelector(".id-btn-next");
+                btnNext.classList.remove("hidden");
+            } else {
+                feedbackBox.classList.add("bg-rose-950/60", "border-rose-800", "text-rose-200");
+                feedbackBox.innerHTML = `<strong>❌ Pas tout à fait.</strong> Vérifiez le temps ou la conjugaison attendue (${currentItem.tense}). Réessayez !`;
+            }
+        }
+
+        function resetJeu() {
+            document.querySelector(".id-btn-next").classList.add("hidden");
+            document.getElementById("section-quiz").classList.add("hidden");
+            document.getElementById("section-wheel").classList.remove("hidden");
+            document.getElementById("step-indicator").innerText = "Étape 1 : Tourner la roue";
+        }
+
+        function toggleAide() {
+            const modal = document.getElementById("modal-aide");
+            modal.classList.toggle("hidden");
+        }
+    </script>
+</body>
+</html>
